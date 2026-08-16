@@ -1,0 +1,3 @@
+UPDATE FOODEE_DB.STAGE.STG_CUSTOMERS
+SET city ='Chennai'
+WHERE customer_id ='C001';
