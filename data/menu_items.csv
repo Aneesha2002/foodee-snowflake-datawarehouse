@@ -1,0 +1,11 @@
+menu_item_id,menu_item_name,restaurant_id,cuisine,price
+M001,Butter Chicken,R001,Indian,280
+M002,Paneer Tikka,R001,Indian,220
+M003,Veg Burger,R002,Fast Food,180
+M004,French Fries,R002,Fast Food,120
+M005,Dumplings,R003,Chinese,200
+M006,Fried Rice,R003,Chinese,190
+M007,Fish Curry,R004,Seafood,320
+M008,Prawn Fry,R004,Seafood,350
+M009,Masala Dosa,R005,Indian,150
+M010,Paneer Biryani,R005,Indian,240
