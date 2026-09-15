@@ -1,0 +1,71 @@
+-- ============================================================
+-- FOODEE - Complete ORDERS Batch Successfully
+-- ============================================================
+
+-- Step 1: Mark the latest ORDERS batch as successful in audit
+INSERT INTO FOODEE_DB.RAW.FOODEE_PIPELINE_AUDIT
+(
+    RUN_ID,
+    PROCESS_NAME,
+    START_TIME,
+    END_TIME,
+    ROWS_PROCESSED,
+    STATUS,
+    ERROR_MESSAGE
+)
+SELECT
+    b.RUN_ID,
+    'ORDERS',
+    b.CREATED_AT,
+    CURRENT_TIMESTAMP(),
+    COUNT(s.ORDER_ID),
+    'SUCCESS',
+    NULL
+FROM FOODEE_DB.RAW.FOODEE_BATCH_CONTROL b
+LEFT JOIN FOODEE_DB.STAGE.STG_ORDERS s
+    ON s.LAST_UPDATED_TIMESTAMP > b.OLD_WATERMARK
+   AND s.LAST_UPDATED_TIMESTAMP <= b.BATCH_END_TIMESTAMP
+WHERE b.RUN_ID =
+(
+    SELECT RUN_ID
+    FROM FOODEE_DB.RAW.FOODEE_BATCH_CONTROL
+    WHERE PROCESS_NAME = 'ORDERS'
+    ORDER BY CREATED_AT DESC
+    LIMIT 1
+)
+GROUP BY
+    b.RUN_ID,
+    b.CREATED_AT;
+
+
+-- Step 2: Advance watermark ONLY to the completed batch boundary
+UPDATE FOODEE_DB.RAW.FOODEE_LOAD_CONTROL
+SET
+    LAST_SUCCESSFUL_TIMESTAMP =
+    (
+        SELECT BATCH_END_TIMESTAMP
+        FROM FOODEE_DB.RAW.FOODEE_BATCH_CONTROL
+        WHERE RUN_ID =
+        (
+            SELECT RUN_ID
+            FROM FOODEE_DB.RAW.FOODEE_BATCH_CONTROL
+            WHERE PROCESS_NAME = 'ORDERS'
+            ORDER BY CREATED_AT DESC
+            LIMIT 1
+        )
+    ),
+    UPDATED_AT = CURRENT_TIMESTAMP()
+WHERE PROCESS_NAME = 'ORDERS';
+
+
+-- Step 3: Verify watermark
+SELECT *
+FROM FOODEE_DB.RAW.FOODEE_LOAD_CONTROL
+WHERE PROCESS_NAME = 'ORDERS';
+
+
+-- Step 4: Verify audit
+SELECT *
+FROM FOODEE_DB.RAW.FOODEE_PIPELINE_AUDIT
+WHERE PROCESS_NAME = 'ORDERS'
+ORDER BY START_TIME DESC;

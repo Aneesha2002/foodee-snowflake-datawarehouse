@@ -106,3 +106,83 @@ SELECT
 
     (SELECT COUNT(*)
      FROM FOODEE_DB.PUB.PUB_ORDER_ITEM) AS pub_count;
+
+     -- ============================================================
+-- Additional Data Quality Checks
+-- ============================================================
+
+
+-- 13. Check duplicate customer natural keys
+SELECT
+    customer_id,
+    COUNT(*) AS row_count
+FROM FOODEE_DB.DM.DIM_CUSTOMER
+GROUP BY customer_id
+HAVING COUNT(*) > 1;
+
+
+-- 14. Check duplicate restaurant natural keys
+SELECT
+    restaurant_id,
+    COUNT(*) AS row_count
+FROM FOODEE_DB.DM.DIM_RESTAURANT
+GROUP BY restaurant_id
+HAVING COUNT(*) > 1;
+
+
+-- 15. Check duplicate menu item natural keys
+SELECT
+    menu_item_id,
+    COUNT(*) AS row_count
+FROM FOODEE_DB.DM.DIM_MENU_ITEM
+GROUP BY menu_item_id
+HAVING COUNT(*) > 1;
+
+
+-- 16. Check overlapping SCD2 customer records
+SELECT
+    c1.customer_id,
+    c1.customer_sk AS record_1,
+    c2.customer_sk AS record_2,
+    c1.effective_start_date AS record_1_start,
+    c1.effective_end_date AS record_1_end,
+    c2.effective_start_date AS record_2_start,
+    c2.effective_end_date AS record_2_end
+FROM FOODEE_DB.DM.DIM_CUSTOMER c1
+JOIN FOODEE_DB.DM.DIM_CUSTOMER c2
+    ON c1.customer_id = c2.customer_id
+   AND c1.customer_sk <> c2.customer_sk
+   AND c1.effective_start_date <= c2.effective_end_date
+   AND c2.effective_start_date <= c1.effective_end_date;
+
+
+-- 17. Check invalid fact values
+SELECT *
+FROM FOODEE_DB.DM.FACT_ORDER_ITEM
+WHERE quantity <= 0
+   OR unit_price < 0
+   OR discount_amount < 0;
+
+
+-- 18. Check explicit layer reconciliation
+SELECT
+    fact_count,
+    prepub_count,
+    pub_count,
+    CASE
+        WHEN fact_count = prepub_count
+         AND prepub_count = pub_count
+        THEN 'PASS'
+        ELSE 'FAIL'
+    END AS reconciliation_status
+FROM (
+    SELECT
+        (SELECT COUNT(*)
+         FROM FOODEE_DB.DM.FACT_ORDER_ITEM) AS fact_count,
+
+        (SELECT COUNT(*)
+         FROM FOODEE_DB.PREPUB.PREPUB_ORDER_ITEM) AS prepub_count,
+
+        (SELECT COUNT(*)
+         FROM FOODEE_DB.PUB.PUB_ORDER_ITEM) AS pub_count
+);

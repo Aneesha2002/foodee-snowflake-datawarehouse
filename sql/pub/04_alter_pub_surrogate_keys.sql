@@ -1,0 +1,12 @@
+-- ============================================================
+-- FOODEE - Add Surrogate Keys to PUB Order Item
+-- ============================================================
+
+ALTER TABLE FOODEE_DB.PUB.PUB_ORDER_ITEM
+ADD COLUMN IF NOT EXISTS CUSTOMER_SK NUMBER(38,0);
+
+ALTER TABLE FOODEE_DB.PUB.PUB_ORDER_ITEM
+ADD COLUMN IF NOT EXISTS RESTAURANT_SK NUMBER(38,0);
+
+ALTER TABLE FOODEE_DB.PUB.PUB_ORDER_ITEM
+ADD COLUMN IF NOT EXISTS MENU_ITEM_SK NUMBER(38,0);

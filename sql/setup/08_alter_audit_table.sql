@@ -1,0 +1,12 @@
+-- ============================================================
+-- FOODEE - Strengthen Pipeline Audit Table
+-- ============================================================
+
+ALTER TABLE FOODEE_DB.RAW.FOODEE_PIPELINE_AUDIT
+ADD COLUMN IF NOT EXISTS TABLE_NAME VARCHAR;
+
+ALTER TABLE FOODEE_DB.RAW.FOODEE_PIPELINE_AUDIT
+ADD COLUMN IF NOT EXISTS LAYER VARCHAR;
+
+ALTER TABLE FOODEE_DB.RAW.FOODEE_PIPELINE_AUDIT
+ADD COLUMN IF NOT EXISTS ROWS_LOADED NUMBER;

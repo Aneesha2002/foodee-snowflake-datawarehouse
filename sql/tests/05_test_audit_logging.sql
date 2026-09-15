@@ -1,0 +1,26 @@
+-- ============================================================
+-- FOODEE - Audit Logging Test
+-- ============================================================
+
+INSERT INTO FOODEE_DB.RAW.FOODEE_PIPELINE_AUDIT
+(
+RUN_ID,
+PROCESS_NAME,
+START_TIME,
+END_TIME,
+ROWS_PROCESSED,
+STATUS,
+ERROR_MESSAGE
+)
+SELECT
+UUID_STRING(),
+'ORDERS',
+CURRENT_TIMESTAMP(),
+CURRENT_TIMESTAMP(),
+1,
+'SUCCESS',
+NULL;
+
+SELECT *
+FROM FOODEE_DB.RAW.FOODEE_PIPELINE_AUDIT
+ORDER BY START_TIME DESC;

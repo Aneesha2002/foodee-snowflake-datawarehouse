@@ -1,0 +1,22 @@
+-- ============================================================
+-- FOODEE - Initialize ORDER_ITEMS Watermark
+-- ============================================================
+
+INSERT INTO FOODEE_DB.RAW.FOODEE_LOAD_CONTROL
+(
+    PROCESS_NAME,
+    LAST_SUCCESSFUL_TIMESTAMP,
+    UPDATED_AT
+)
+SELECT
+    'ORDER_ITEMS',
+    MAX(LAST_UPDATED_TIMESTAMP),
+    CURRENT_TIMESTAMP()
+FROM FOODEE_DB.RAW.RAW_ORDER_ITEMS
+WHERE LAST_UPDATED_TIMESTAMP IS NOT NULL;
+
+
+-- Verify
+SELECT *
+FROM FOODEE_DB.RAW.FOODEE_LOAD_CONTROL
+WHERE PROCESS_NAME = 'ORDER_ITEMS';
